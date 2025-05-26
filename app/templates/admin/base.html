@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin Panel{% endblock %} - Maria Elena Bienes Raíces</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" media="print" onload="this.media='all'" />
+    <style>
+        body {
+            font-family: "Nunito Sans", "Nunito Sans Placeholder", sans-serif;
+        }
+    </style>
+    {% block head_extra %}{% endblock %}
+</head>
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <nav class="bg-gray-800 text-white p-4 shadow-md">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{{ url_for('admin.dashboard') }}" class="flex items-center space-x-2 text-xl font-semibold hover:text-gray-300 transition-colors">
+                <img src="{{ url_for('static', filename='images/logo_placeholder_white.png') }}" alt="Logo Admin" class="h-8 w-8">
+                <span>Admin Panel</span>
+            </a>
+            <div class="flex items-center space-x-4">
+                {% if current_user.is_authenticated and isinstance(current_user, AdminUser) %}
+                    <span class="text-sm">Hola, {{ current_user.username }}!</span>
+                    <a href="{{ url_for('admin.dashboard') }}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors">Dashboard</a>
+                    <a href="{{ url_for('main.index') }}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors">Ver Sitio</a>
+                    <a href="{{ url_for('admin.logout') }}" class="text-sm font-medium text-red-400 hover:text-red-300 px-3 py-2 rounded-md hover:bg-red-700 transition-colors">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('admin.login') }}" class="text-sm font-medium text-gray-300 hover:text-white px-3 py-2 rounded-md hover:bg-gray-700 transition-colors">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow container mx-auto p-6 mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="rounded-md p-4 
+                        {% if category == 'success' %} bg-green-100 border border-green-400 text-green-700 
+                        {% elif category == 'danger' %} bg-red-100 border border-red-400 text-red-700
+                        {% elif category == 'warning' %} bg-yellow-100 border border-yellow-400 text-yellow-700
+                        {% else %} bg-blue-100 border border-blue-400 text-blue-700 
+                        {% endif %}" role="alert">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-gray-200 text-center p-4 mt-auto">
+        <p class="text-sm text-gray-600">&copy; 2024 Maria Elena Bienes Raíces Admin Panel</p>
+    </footer>
+
+</body>
+</html>

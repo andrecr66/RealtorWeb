@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }} - Maria Elena Bienes Raíces</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" media="print" onload="this.media='all'" />
+    <style>
+        body { font-family: "Nunito Sans", "Nunito Sans Placeholder", sans-serif; }
+        .filter-input {
+            @apply w-full rounded-md border border-solid border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors;
+        }
+        .filter-label {
+            @apply mb-1.5 block text-sm font-medium text-gray-700;
+        }
+        .filter-fieldset {
+            @apply mb-4 p-4 border border-gray-200 rounded-md;
+        }
+        .filter-legend {
+            @apply text-sm font-semibold text-gray-700 px-1;
+        }
+        .property-card {
+            @apply flex flex-col rounded-lg bg-white p-4 shadow-lg hover:shadow-xl transition-shadow duration-150 ease-in-out overflow-hidden;
+        }
+        .property-image {
+            @apply mb-4 h-52 w-full rounded-md object-cover transition-transform duration-300 group-hover:scale-105;
+        }
+        .property-title {
+            @apply mb-2 text-lg font-semibold text-gray-800 truncate;
+        }
+        .property-price {
+            @apply mb-2 text-xl font-bold text-blue-600;
+        }
+        .property-details-text {
+            @apply text-sm text-gray-600 mb-1;
+        }
+        .property-address-text {
+             @apply text-xs text-gray-500 mb-3 truncate;
+        }
+        .view-details-button {
+            @apply mt-auto w-full text-center whitespace-nowrap rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 px-4 sm:px-10 py-3">
+                <div class="flex items-center gap-4">
+                    <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="Logo" class="h-10 w-10 shrink-0" />
+                    <div class="font-bold text-lg text-[#333333]">Maria Elena Bienes Raíces</div>
+                </div>
+                <nav class="flex items-center gap-6 sm:gap-8">
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.index') }}">Inicio</a>
+                    <a class="text-sm font-medium text-blue-600" href="{{ url_for('main.properties_list') }}">Propiedades</a>
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.about_agent') }}">Agente</a>
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.sales_history') }}">Testimonios</a>
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.contact') }}">Contacto</a>
+                </nav>
+            </header>
+
+            <main class="flex-1 bg-gray-50 py-10">
+                <section class="container mx-auto px-4 sm:px-10">
+                    <!-- Flashed messages section -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="mb-6">
+                            {% for category, message in messages %}
+                                <div class="rounded-md p-4 
+                                    {% if category == 'success' %} bg-green-100 border border-green-400 text-green-700 
+                                    {% elif category == 'danger' %} bg-red-100 border border-red-400 text-red-700
+                                    {% elif category == 'warning' %} bg-yellow-100 border border-yellow-400 text-yellow-700
+                                    {% else %} bg-blue-100 border border-blue-400 text-blue-700 
+                                    {% endif %}" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <form method="GET" action="{{ url_for('main.properties_list') }}">
+                        <div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
+                            <h2 class="text-3xl font-semibold text-gray-800">Listado de Propiedades</h2>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-x-8 gap-y-10 md:grid-cols-12">
+                            <aside class="md:col-span-3">
+                                <div class="rounded-lg bg-white p-6 shadow-lg sticky top-10">
+                                    <h3 class="mb-6 text-xl font-semibold text-gray-700 border-b pb-3">Filtros Avanzados</h3>
+                                    <div class="flex flex-col gap-5">
+                                        <div>
+                                            <label for="search_query" class="filter-label">Palabra Clave / Ubicación</label>
+                                            <input type="text" id="search_query" name="search_query" value="{{ request.args.get('search_query', '') }}" placeholder="Ej: Casa con piscina, Centro" class="filter-input" />
+                                        </div>
+                                        <div>
+                                            <label for="property_type" class="filter-label">Tipo de Propiedad</label>
+                                            <select id="property_type" name="property_type" class="filter-input">
+                                                <option value="">Todos</option>
+                                                {% set p_type = request.args.get('property_type', '') %}
+                                                <option value="Casa" {% if p_type == 'Casa' %}selected{% endif %}>Casa</option>
+                                                <option value="Apartamento" {% if p_type == 'Apartamento' %}selected{% endif %}>Apartamento</option>
+                                                <option value="Terreno" {% if p_type == 'Terreno' %}selected{% endif %}>Terreno</option>
+                                                <option value="Comercial" {% if p_type == 'Comercial' %}selected{% endif %}>Comercial</option>
+                                                <option value="Villa" {% if p_type == 'Villa' %}selected{% endif %}>Villa</option>
+                                                <option value="Finca" {% if p_type == 'Finca' %}selected{% endif %}>Finca</option>
+                                                <option value="Local" {% if p_type == 'Local' %}selected{% endif %}>Local</option>
+                                                <option value="Piso" {% if p_type == 'Piso' %}selected{% endif %}>Piso</option>
+                                                <option value="Chalet" {% if p_type == 'Chalet' %}selected{% endif %}>Chalet</option>
+                                                <option value="Ático" {% if p_type == 'Ático' %}selected{% endif %}>Ático</option>
+                                            </select>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label for="price_min" class="filter-label">Precio Mín.</label>
+                                                <input type="number" id="price_min" name="price_min" value="{{ request.args.get('price_min', '') }}" placeholder="$0" class="filter-input" />
+                                            </div>
+                                            <div>
+                                                <label for="price_max" class="filter-label">Precio Máx.</label>
+                                                <input type="number" id="price_max" name="price_max" value="{{ request.args.get('price_max', '') }}" placeholder="$1M+" class="filter-input" />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label for="bedrooms" class="filter-label">Dormitorios</label>
+                                            <select id="bedrooms" name="bedrooms" class="filter-input">
+                                                <option value="">Cualquiera</option>
+                                                {% for i in range(1, 6) %}
+                                                <option value="{{ i }}" {% if request.args.get('bedrooms') == i|string %}selected{% endif %}>{{ i }}+</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="bathrooms" class="filter-label">Baños</label>
+                                            <select id="bathrooms" name="bathrooms" class="filter-input">
+                                                <option value="">Cualquiera</option>
+                                                 {% for i in range(1, 5) %}
+                                                <option value="{{ i }}" {% if request.args.get('bathrooms') == i|string %}selected{% endif %}>{{ i }}+</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label for="size_sqm_min" class="filter-label">Superficie Mín. (m²)</label>
+                                            <input type="number" id="size_sqm_min" name="size_sqm_min" value="{{ request.args.get('size_sqm_min', '') }}" placeholder="Ej: 50" class="filter-input" />
+                                        </div>
+                                        <fieldset class="filter-fieldset">
+                                            <legend class="filter-legend">Características</legend>
+                                            <div class="mt-2 space-y-2">
+                                                {% set features_list = [('feature_pool', 'Piscina'), ('feature_garage', 'Garaje'), ('feature_garden', 'Jardín'), ('feature_terrace', 'Terraza / Balcón'), ('feature_ac', 'Aire Acondicionado')] %}
+                                                {% for name, label in features_list %}
+                                                <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
+                                                    <input type="checkbox" name="{{ name }}" value="{{ label }}" class="size-4 shrink-0 accent-blue-600 rounded border-gray-300 focus:ring-blue-500" {% if request.args.get(name) %}checked{% endif %} /> <span>{{ label }}</span>
+                                                </label>
+                                                {% endfor %}
+                                            </div>
+                                        </fieldset>
+                                        <div>
+                                            <label for="sort_by" class="filter-label">Ordenar Por</label>
+                                            <select id="sort_by" name="sort_by" class="filter-input">
+                                                <option value="relevance" {% if request.args.get('sort_by', 'relevance') == 'relevance' %}selected{% endif %}>Relevancia</option>
+                                                <option value="price_asc" {% if request.args.get('sort_by') == 'price_asc' %}selected{% endif %}>Precio: Bajo a Alto</option>
+                                                <option value="price_desc" {% if request.args.get('sort_by') == 'price_desc' %}selected{% endif %}>Precio: Alto a Bajo</option>
+                                                <option value="date_desc" {% if request.args.get('sort_by') == 'date_desc' %}selected{% endif %}>Más Recientes</option>
+                                                <option value="date_asc" {% if request.args.get('sort_by') == 'date_asc' %}selected{% endif %}>Más Antiguos</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="mt-3 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"> Aplicar Filtros </button>
+                                    </div>
+                                </div>
+                            </aside>
+
+                            <section class="grid grid-cols-1 gap-6 md:col-span-9 sm:grid-cols-2 lg:grid-cols-3">
+                                {% if properties %}
+                                    {% for property in properties %}
+                                    <div class="property-card group">
+                                        {% set image_filenames = property.images.split(',') if property.images else [] %}
+                                        {% set image_url = url_for('static', filename='images/placeholder_property_1.jpg') %}
+                                        {% if image_filenames and image_filenames[0] %}
+                                            {% set image_url = url_for('static', filename='uploads/properties/' + image_filenames[0].strip()) %}
+                                        {% endif %}
+                                        <img src="{{ image_url }}" alt="Imagen de {{ property.title }}" class="property-image" />
+                                        <h3 class="property-title" title="{{ property.title }}">{{ property.title }}</h3>
+                                        <p class="property-price">${{ "%.0f"|format(property.price) }}</p>
+                                        <p class="property-details-text"><span class="font-medium">Tipo:</span> {{ property.property_type }}</p>
+                                        <p class="property-address-text" title="{{ property.address }}"><span class="font-medium">Ubicación:</span> {{ property.address.split(',')[0] if property.address else 'N/A' }}</p>
+                                        <p class="property-details-text">
+                                            <span class="font-medium">{{ property.bedrooms }}</span> Dorm., 
+                                            <span class="font-medium">{{ property.bathrooms }}</span> Baños, 
+                                            <span class="font-medium">{{ property.size_sqm }}</span> m²
+                                        </p>
+                                        <a href="{{ url_for('main.property_detail', property_id=property.id) }}" class="view-details-button">
+                                            Ver Detalles
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <p class="md:col-span-3 text-center text-gray-500 py-10 text-lg">No se encontraron propiedades que coincidan con sus criterios de búsqueda.</p>
+                                {% endif %}
+                            </section>
+                        </div>
+                    </form> {# End of the main form #}
+                    <nav class="mt-12 flex items-center justify-center gap-2 px-4 sm:px-10" aria-label="Paginación">
+                        {# Pagination links will be added here in a later task #}
+                        <button class="flex size-10 items-center justify-center rounded-md border border-solid border-gray-300 text-sm text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50" disabled=""> <svg viewBox="0 0 24 24" fill="currentColor" class="size-5"> <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path> </svg> </button>
+                        <button class="flex size-10 items-center justify-center rounded-md border border-solid border-blue-600 bg-blue-600 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-1 focus:ring-blue-500">1</button>
+                        <button class="flex size-10 items-center justify-center rounded-md border border-solid border-gray-300 text-sm text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500">2</button>
+                        <button class="flex size-10 items-center justify-center rounded-md border border-solid border-gray-300 text-sm text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500">3</button>
+                        <span class="px-1.5 text-sm text-gray-500">...</span>
+                        <button class="flex size-10 items-center justify-center rounded-md border border-solid border-gray-300 text-sm text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500">10</button>
+                        <button class="flex size-10 items-center justify-center rounded-md border border-solid border-gray-300 text-sm text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-1 focus:ring-blue-500"> <svg viewBox="0 0 24 24" fill="currentColor" class="size-5"> <path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"></path> </svg> </button>
+                    </nav>
+                </section>
+            </main>
+            <footer class="bg-gray-800 text-gray-200 px-10 py-8 text-center">
+                <p class="text-sm">&copy; {{ JINJA_GLOBALS.current_year }} Maria Elena Bienes Raíces. Todos los derechos reservados.</p>
+                <p class="text-xs mt-1">Diseñado con ❤️</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

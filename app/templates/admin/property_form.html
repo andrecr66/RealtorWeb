@@ -1,0 +1,176 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ 'Edit Property' if property and property.id else 'Add New Property' }}{% endblock %}
+
+{% block head_extra %}
+<style>
+    .form-input-admin {
+        @apply mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors;
+    }
+    .form-label-admin {
+        @apply block text-sm font-medium text-gray-700 mb-1;
+    }
+    .image-preview-container {
+        @apply grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-2;
+    }
+    .image-preview-item {
+        @apply relative group border border-gray-200 rounded-lg p-1 shadow-sm;
+    }
+    .image-preview-img {
+        @apply w-full h-28 object-cover rounded-md;
+    }
+    .delete-image-label {
+        @apply absolute top-1 right-1 flex items-center p-1 bg-white bg-opacity-80 rounded text-xs text-red-600 hover:bg-red-100 cursor-pointer shadow transition-opacity opacity-0 group-hover:opacity-100;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6 pb-4 border-b border-gray-200">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800">
+            {{ 'Edit Property: ' + property.title if property and property.id else 'Add New Property' }}
+        </h1>
+        <a href="{{ url_for('admin.manage_properties') }}" class="mt-3 sm:mt-0 inline-flex items-center text-sm text-gray-600 hover:text-indigo-600 transition-colors">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Back to Properties
+        </a>
+    </div>
+
+    <form method="POST" action="{{ action_url }}" enctype="multipart/form-data" class="bg-white p-6 md:p-8 rounded-xl shadow-2xl">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6">
+            <!-- Left Column / Main Details -->
+            <div class="lg:col-span-2 space-y-6">
+                <div>
+                    <label for="title" class="form-label-admin">Title</label>
+                    <input type="text" id="title" name="title" value="{{ property.title if property else '' }}" required class="form-input-admin">
+                </div>
+
+                <div>
+                    <label for="description" class="form-label-admin">Description</label>
+                    <textarea id="description" name="description" rows="6" required class="form-input-admin resize-none">{{ property.description if property else '' }}</textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="price" class="form-label-admin">Price ($)</label>
+                        <input type="number" id="price" name="price" step="0.01" value="{{ property.price if property else '' }}" required class="form-input-admin">
+                    </div>
+                    <div>
+                        <label for="property_type" class="form-label-admin">Property Type</label>
+                        <select id="property_type" name="property_type" required class="form-input-admin">
+                            <option value="">Select Type</option>
+                            {% set p_type = property.property_type if property else '' %}
+                            <option value="Casa" {% if p_type == 'Casa' %}selected{% endif %}>Casa</option>
+                            <option value="Apartamento" {% if p_type == 'Apartamento' %}selected{% endif %}>Apartamento</option>
+                            <option value="Terreno" {% if p_type == 'Terreno' %}selected{% endif %}>Terreno</option>
+                            <option value="Comercial" {% if p_type == 'Comercial' %}selected{% endif %}>Comercial</option>
+                            <option value="Villa" {% if p_type == 'Villa' %}selected{% endif %}>Villa</option>
+                            <option value="Finca" {% if p_type == 'Finca' %}selected{% endif %}>Finca</option>
+                            <option value="Local" {% if p_type == 'Local' %}selected{% endif %}>Local</option>
+                            <option value="Piso" {% if p_type == 'Piso' %}selected{% endif %}>Piso</option>
+                            <option value="Chalet" {% if p_type == 'Chalet' %}selected{% endif %}>Chalet</option>
+                            <option value="Ático" {% if p_type == 'Ático' %}selected{% endif %}>Ático</option>
+                            <option value="Otro" {% if p_type == 'Otro' %}selected{% endif %}>Otro</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="address" class="form-label-admin">Address</label>
+                    <input type="text" id="address" name="address" value="{{ property.address if property else '' }}" required class="form-input-admin">
+                </div>
+                <div>
+                    <label for="features" class="form-label-admin">Features (comma-separated)</label>
+                    <textarea id="features" name="features" rows="3" class="form-input-admin resize-none">{{ property.features if property else '' }}</textarea>
+                </div>
+            </div>
+
+            <!-- Right Column / Secondary Details & Status -->
+            <div class="lg:col-span-1 space-y-6 bg-gray-50 p-6 rounded-lg shadow-inner">
+                 <div>
+                    <label for="agent_id" class="form-label-admin">Agent</label>
+                    <select id="agent_id" name="agent_id" required class="form-input-admin">
+                        <option value="">Select Agent</option>
+                        {% for agent in available_agents %}
+                            <option value="{{ agent.id }}" {% if property and property.agent_id == agent.id %}selected{% endif %}>
+                                {{ agent.name }} (ID: {{ agent.id }})
+                            </option>
+                        {% else %}
+                            <option value="" disabled>No agents available. Please add an agent first.</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-x-4 gap-y-6">
+                    <div>
+                        <label for="size_sqm" class="form-label-admin">Size (sqm)</label>
+                        <input type="number" id="size_sqm" name="size_sqm" value="{{ property.size_sqm if property else '' }}" class="form-input-admin">
+                    </div>
+                     <div>
+                        <label for="status" class="form-label-admin">Status</label>
+                        <select id="status" name="status" required class="form-input-admin">
+                            {% set current_status = property.status if property else 'For Sale' %}
+                            <option value="For Sale" {% if current_status == 'For Sale' %}selected{% endif %}>For Sale</option>
+                            <option value="Sold" {% if current_status == 'Sold' %}selected{% endif %}>Sold</option>
+                            <option value="Rented" {% if current_status == 'Rented' %}selected{% endif %}>Rented</option>
+                            <option value="Pending" {% if current_status == 'Pending' %}selected{% endif %}>Pending</option>
+                            <option value="Unavailable" {% if current_status == 'Unavailable' %}selected{% endif %}>Unavailable</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="bedrooms" class="form-label-admin">Bedrooms</label>
+                        <input type="number" id="bedrooms" name="bedrooms" value="{{ property.bedrooms if property else '' }}" class="form-input-admin">
+                    </div>
+                    <div>
+                        <label for="bathrooms" class="form-label-admin">Bathrooms</label>
+                        <input type="number" id="bathrooms" name="bathrooms" value="{{ property.bathrooms if property else '' }}" class="form-input-admin">
+                    </div>
+                </div>
+               
+                <div class="pt-2">
+                    <label for="images" class="form-label-admin">
+                        {{ 'Add New Images' if property and property.images else 'Upload Images' }}
+                        <span class="text-xs text-gray-500">(Multiple allowed)</span>
+                    </label>
+                    <input type="file" id="images" name="images" multiple
+                           class="block w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 transition-colors cursor-pointer border border-gray-300 rounded-lg">
+                </div>
+
+                {% if property and property.images %}
+                <div class="pt-2">
+                    <p class="form-label-admin mb-2">Current Images:</p>
+                    <div class="image-preview-container">
+                        {% set image_list = property.images.split(',') %}
+                        {% for image_filename in image_list %}
+                            {% if image_filename.strip() %}
+                            <div class="image-preview-item">
+                                <img src="{{ url_for('static', filename='uploads/properties/' + image_filename.strip()) }}" 
+                                     alt="Property image {{ loop.index }}" class="image-preview-img">
+                                <label class="delete-image-label">
+                                    <input type="checkbox" name="delete_images" value="{{ image_filename.strip() }}" class="mr-1 size-3.5 accent-red-500"> Del
+                                </label>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                     <p class="text-xs text-gray-500 mt-2">Check "Del" and save to remove an image.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-10 pt-6 border-t border-gray-200">
+            <div class="flex justify-end space-x-3">
+                <a href="{{ url_for('admin.manage_properties') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 ease-in-out text-sm">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-150 ease-in-out text-sm">
+                    <svg class="w-5 h-5 mr-2 inline-block -ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                    {{ 'Save Changes' if property and property.id else 'Create Property' }}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

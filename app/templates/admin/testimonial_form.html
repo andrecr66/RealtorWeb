@@ -1,0 +1,67 @@
+{% extends 'admin/base.html' %}
+
+{% block title %}{{ 'Edit Testimonial' if testimonial else 'Add New Testimonial' }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-8 py-8">
+    <h2 class="text-2xl font-semibold leading-tight text-gray-800 mb-6">
+        {{ 'Edit Testimonial' if testimonial else 'Add New Testimonial' }}
+    </h2>
+
+    <form method="POST" 
+          action="{{ url_for('admin.edit_testimonial', testimonial_id=testimonial.id) if testimonial else url_for('admin.add_testimonial') }}" 
+          class="bg-white p-6 rounded-lg shadow-md">
+        
+        <div class="mb-4">
+            <label for="client_name" class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+            <input type="text" id="client_name" name="client_name" value="{{ testimonial.client_name if testimonial else '' }}" required
+                   class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+
+        <div class="mb-4">
+            <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date (YYYY-MM-DD)</label>
+            <input type="text" id="date" name="date" value="{{ testimonial.date.strftime('%Y-%m-%d') if testimonial and testimonial.date else '' }}" required
+                   placeholder="YYYY-MM-DD"
+                   class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+
+        <div class="mb-4">
+            <label for="rating" class="block text-sm font-medium text-gray-700 mb-1">Rating (1-5, optional)</label>
+            <input type="number" id="rating" name="rating" min="1" max="5" value="{{ testimonial.rating if testimonial and testimonial.rating is not none else '' }}"
+                   class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+        </div>
+
+        <div class="mb-4">
+            <label for="comment" class="block text-sm font-medium text-gray-700 mb-1">Comment</label>
+            <textarea id="comment" name="comment" rows="5" required
+                      class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ testimonial.comment if testimonial else '' }}</textarea>
+        </div>
+
+        <div class="mb-4">
+            <label for="property_id" class="block text-sm font-medium text-gray-700 mb-1">Associated Property (Optional)</label>
+            <select id="property_id" name="property_id"
+                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <option value="None">-- No specific property --</option>
+                {% for prop in properties %}
+                    <option value="{{ prop.id }}" 
+                            {% if testimonial and testimonial.property_id == prop.id %}selected{% endif %}>
+                        {{ prop.title }} (ID: {{ prop.id }})
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mt-8 pt-5 border-t border-gray-200">
+            <div class="flex justify-end">
+                <a href="{{ url_for('admin.manage_testimonials') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium py-2 px-4 rounded-md mr-3 transition duration-150 ease-in-out">
+                    Cancel
+                </a>
+                <button type="submit"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out">
+                    {{ 'Save Changes' if form_action == 'edit' else 'Create Testimonial' }}
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

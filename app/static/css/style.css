@@ -1,0 +1,9 @@
+/* Placeholder for custom styles */
+/* Tailwind CSS is primarily used via CDN as per the HTML templates */
+
+body {
+    /* Example: You can add a base font-family here if not relying solely on Tailwind's defaults or CDN fonts in HTML */
+    /* font-family: 'Nunito Sans', sans-serif; */
+}
+
+/* Add any global custom styles or overrides here */

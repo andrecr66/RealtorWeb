@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }} - Maria Elena Bienes Raíces</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" media="print" onload="this.media='all'" />
+    <style>
+        body { font-family: "Nunito Sans", "Nunito Sans Placeholder", sans-serif; }
+        .detail-icon { @apply size-5 text-gray-500 mr-2; }
+        .feature-item { @apply flex items-center p-2 bg-gray-50 rounded-md; }
+        .form-input { @apply w-full rounded-md border border-solid border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors; }
+        .button-primary { @apply flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors; }
+        .button-secondary { @apply flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-solid border-blue-600 px-4 py-2.5 text-sm font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors; }
+        .button-success { @apply flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors; }
+        .property-card-small { @apply flex flex-col rounded-lg bg-white p-4 shadow-lg hover:shadow-xl transition-shadow duration-150 ease-in-out overflow-hidden; }
+
+    </style>
+</head>
+<body class="text-gray-800">
+    <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden">
+        <div class="layout-container flex h-full grow flex-col">
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 px-4 sm:px-10 py-3">
+                <div class="flex items-center gap-4">
+                    <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="Logo" class="h-10 w-10 shrink-0" />
+                    <div class="font-bold text-lg text-[#333333]">Maria Elena Bienes Raíces</div>
+                </div>
+                <nav class="flex items-center gap-6 sm:gap-8">
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.index') }}">Inicio</a>
+                    <a class="text-sm font-medium text-blue-600" href="{{ url_for('main.properties_list') }}">Propiedades</a>
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.about_agent') }}">Agente</a>
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.sales_history') }}">Testimonios</a>
+                    <a class="text-sm font-medium text-gray-700 hover:text-blue-600" href="{{ url_for('main.contact') }}">Contacto</a>
+                </nav>
+            </header>
+
+            <main class="flex-1 bg-gray-50 py-10">
+                <section class="container mx-auto px-4 sm:px-10">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <div class="mb-6">
+                            {% for category, message in messages %}
+                                <div class="rounded-md p-4 
+                                    {% if category == 'success' %} bg-green-100 border border-green-400 text-green-700 
+                                    {% elif category == 'danger' %} bg-red-100 border border-red-400 text-red-700
+                                    {% elif category == 'warning' %} bg-yellow-100 border border-yellow-400 text-yellow-700
+                                    {% else %} bg-blue-100 border border-blue-400 text-blue-700 
+                                    {% endif %}" role="alert">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% endwith %}
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8">
+                        <div class="lg:col-span-2">
+                            <div class="rounded-lg bg-white p-6 shadow-lg">
+                                {% set image_list = property_data.images.split(',') if property_data.images else [] %}
+                                {% set main_image_url = url_for('static', filename='images/hero_placeholder_2.jpg') %}
+                                {% if image_list and image_list[0] %}
+                                    {% set main_image_url = url_for('static', filename='uploads/properties/' + image_list[0].strip()) %}
+                                {% endif %}
+                                <img src="{{ main_image_url }}" alt="Imagen Principal de {{ property_data.title }}" class="mb-6 h-auto w-full rounded-lg object-cover max-h-[600px] shadow-md" />
+                                
+                                {% if image_list|length > 1 %}
+                                <div class="mb-6 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                                    {% for image_filename in image_list %}
+                                        {% if image_filename.strip() %}
+                                            <img src="{{ url_for('static', filename='uploads/properties/' + image_filename.strip()) }}" 
+                                                 alt="Miniatura de {{ property_data.title }}" 
+                                                 class="h-24 w-full cursor-pointer rounded-md object-cover shadow hover:shadow-lg transition-shadow" 
+                                                 onclick="document.querySelector('.max-h-\\[600px\\]').src=this.src">
+                                        {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+
+                                <h1 class="mb-3 text-3xl sm:text-4xl font-bold text-gray-800">{{ property_data.title }}</h1>
+                                <p class="mb-6 text-3xl font-bold text-blue-600">${{ "%.0f"|format(property_data.price) }}</p>
+                                
+                                <div class="mb-6 border-t pt-6">
+                                    <h3 class="mb-4 text-xl font-semibold text-gray-700">Detalles de la Propiedad</h3>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-gray-700">
+                                        <div class="flex items-center"><svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> <span>{{ property_data.property_type }}</span></div>
+                                        <div class="flex items-center"><svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <span class="truncate" title="{{ property_data.address }}">{{ property_data.address }}</span></div>
+                                        <div class="flex items-center"><svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg> <span>{{ property_data.size_sqm }} m²</span></div>
+                                        <div class="flex items-center"><svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path></svg> <span>{{ property_data.bedrooms }} Dormitorios</span></div>
+                                        <div class="flex items-center"><svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> <span>{{ property_data.bathrooms }} Baños</span></div>
+                                        <div class="flex items-center"><svg class="detail-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg> <span class="px-2 py-0.5 text-xs font-semibold {{ 'bg-green-100 text-green-800' if property_data.status == 'For Sale' else 'bg-yellow-100 text-yellow-800' if property_data.status == 'Pending' else 'bg-red-100 text-red-800' if property_data.status == 'Sold' else 'bg-gray-100 text-gray-800' }} rounded-full">{{ property_data.status }}</span></div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-6 border-t pt-6">
+                                    <h3 class="mb-3 text-xl font-semibold text-gray-700">Descripción Detallada</h3>
+                                    <p class="text-gray-600 leading-relaxed whitespace-pre-line">{{ property_data.description }}</p>
+                                </div>
+                                
+                                {% if property_data.features %}
+                                <div class="mb-6 border-t pt-6">
+                                    <h3 class="mb-3 text-xl font-semibold text-gray-700">Características Principales</h3>
+                                    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-gray-600">
+                                        {% for feature in property_data.features.split(',') %}
+                                            <li class="feature-item">
+                                                <svg class="size-5 text-green-500 mr-2 shrink-0" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+                                                <span>{{ feature.strip() }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+
+                                <div>
+                                    <h3 class="mb-4 text-xl font-semibold text-gray-700">Ubicación en el Mapa</h3>
+                                    <div class="h-96 w-full rounded-lg bg-gray-300 shadow-md">
+                                        <img src="{{ url_for('static', filename='images/map_placeholder.png') }}" alt="Mapa de ubicación de la propiedad" class="h-full w-full object-cover opacity-75" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="lg:col-span-1">
+                            <div class="sticky top-10 flex flex-col gap-6">
+                                <div class="rounded-lg bg-white p-6 shadow-lg">
+                                    <div class="mb-5 flex flex-col items-center text-center">
+                                        {% set agent_pic = url_for('static', filename='images/agent_placeholder.png') %}
+                                        {% if property_data.agent and property_data.agent.profile_picture_url %}
+                                            {% set agent_pic = url_for('static', filename='uploads/agent_profile/' + property_data.agent.profile_picture_url) %}
+                                        {% endif %}
+                                        <img src="{{ agent_pic }}" alt="Foto del Agente {{ property_data.agent.name if property_data.agent else 'N/A' }}" class="size-28 shrink-0 rounded-full object-cover shadow-md mb-3" />
+                                        <div>
+                                            <h4 class="text-xl font-semibold text-gray-800">{{ property_data.agent.name if property_data.agent else 'Maria Elena Rodríguez' }}</h4>
+                                            <p class="text-sm text-blue-600">Agente Inmobiliario Principal</p>
+                                            {% if property_data.agent and property_data.agent.phone %}
+                                                <p class="text-sm text-gray-600 mt-1">{{ property_data.agent.phone }}</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <a href="tel:{{ property_data.agent.phone if property_data.agent and property_data.agent.phone else ''}}" class="button-success mb-3 w-full">
+                                        <svg class="size-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path></svg>
+                                        Llamar Ahora
+                                    </a>
+                                    <!-- The 'Enviar Mensaje' button could trigger a modal or this form -->
+                                </div>
+                                <div class="rounded-lg bg-white p-6 shadow-lg">
+                                    <h4 class="mb-4 text-xl font-semibold text-gray-700">Solicitar Más Información</h4>
+                                    <form method="POST" action="{{ url_for('main.contact_property', property_id=property_data.id) }}" class="flex flex-col gap-4">
+                                        <input type="text" name="name" placeholder="Nombre Completo" required class="form-input" />
+                                        <input type="email" name="email" placeholder="Correo Electrónico" required class="form-input" />
+                                        <input type="tel" name="phone" placeholder="Número de Teléfono (Opcional)" class="form-input" />
+                                        <textarea name="message" placeholder="Estoy interesado en esta propiedad y me gustaría más detalles." rows="5" required class="form-input" spellcheck="false"></textarea>
+                                        <label class="flex items-center gap-2 text-sm text-gray-600">
+                                            <input type="checkbox" name="communications_consent" class="size-4 shrink-0 accent-blue-600 rounded border-gray-300" />
+                                            <span>Acepto recibir comunicaciones y actualizaciones.</span>
+                                        </label>
+                                        <button type="submit" class="button-primary w-full"> Enviar Solicitud </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <section class="bg-gray-100 py-12 mt-10">
+                    <div class="container mx-auto px-4 sm:px-10">
+                        <h3 class="mb-8 text-2xl font-semibold text-gray-800">Propiedades Similares</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {% if similar_properties %}
+                                {% for prop in similar_properties %}
+                                <div class="property-card-small group">
+                                    {% set sim_image_filenames = prop.images.split(',') if prop.images else [] %}
+                                    {% set sim_image_url = url_for('static', filename='images/placeholder_property_2.jpg') %}
+                                    {% if sim_image_filenames and sim_image_filenames[0] %}
+                                        {% set sim_image_url = url_for('static', filename='uploads/properties/' + sim_image_filenames[0].strip()) %}
+                                    {% endif %}
+                                    <img src="{{ sim_image_url }}" alt="Imagen de {{ prop.title }}" class="mb-3 h-40 w-full rounded-md object-cover transition-transform duration-300 group-hover:scale-105" />
+                                    <h4 class="mb-1 text-md font-semibold text-gray-700 truncate" title="{{ prop.title }}">{{ prop.title }}</h4>
+                                    <p class="mb-2 text-sm text-blue-600 font-bold">${{ "%.0f"|format(prop.price) }}</p>
+                                    <p class="text-xs text-gray-500 mb-2">{{ prop.bedrooms }} Dorm., {{ prop.bathrooms }} Baños, {{ prop.size_sqm }} m²</p>
+                                    <a href="{{ url_for('main.property_detail', property_id=prop.id) }}" class="mt-auto w-full text-center whitespace-nowrap rounded-md border border-solid border-blue-600 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors">
+                                        Ver Detalles
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="col-span-full text-center text-gray-500">No hay propiedades similares disponibles en este momento.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+            </main>
+            <footer class="bg-gray-800 text-gray-200 px-10 py-8 text-center">
+                <p class="text-sm">&copy; {{ JINJA_GLOBALS.current_year }} Maria Elena Bienes Raíces. Todos los derechos reservados.</p>
+                <p class="text-xs mt-1">Diseñado con ❤️</p>
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

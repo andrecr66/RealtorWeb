@@ -1,0 +1,78 @@
+<html> <head> <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="" /> <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" /> <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;500;600;700&amp;display=swap" media="print" onload="this.media='all'" /> <script src="https://cdn.tailwindcss.com"></script> <title>{{ title }} - Maria Elena Bienes Raíces</title> </head> <body class="text-gray-800"> <div class="relative flex size-full min-h-screen flex-col bg-white group/design-root overflow-x-hidden" style='font-family: "Nunito Sans", "Nunito Sans Placeholder", sans-serif;'> <div class="layout-container flex h-full grow flex-col"> <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-gray-200 px-4 sm:px-10 py-3"> <div class="flex items-center gap-4"> <img src="{{ url_for('static', filename='images/logo_placeholder.png') }}" alt="Logo" class="h-10 w-10 shrink-0" /> <div class="font-bold text-lg text-[#333333]">Maria Elena Bienes Raíces</div> </div> <nav class="flex items-center gap-6 sm:gap-8">
+ <a class="text-sm font-medium text-[#007bff] hover:text-[#0056b3]" href="{{ url_for('main.index') }}">Inicio</a>
+ <a class="text-sm font-medium text-gray-700 hover:text-[#007bff]" href="{{ url_for('main.properties_list') }}">Propiedades</a>
+ <a class="text-sm font-medium text-gray-700 hover:text-[#007bff]" href="{{ url_for('main.about_agent') }}">Agente</a>
+ <a class="text-sm font-medium text-gray-700 hover:text-[#007bff]" href="{{ url_for('main.sales_history') }}">Testimonios</a>
+ <a class="text-sm font-medium text-gray-700 hover:text-[#007bff]" href="{{ url_for('main.contact') }}">Contacto</a>
+ </nav> </header> <main class="flex-1 bg-gray-50 py-10">
+                <!-- Flashed messages section -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="container mx-auto px-4 sm:px-10 mb-6">
+                        {% for category, message in messages %}
+                            <div class="rounded-md p-4 
+                                {% if category == 'success' %} bg-green-100 border border-green-400 text-green-700 
+                                {% elif category == 'danger' %} bg-red-100 border border-red-400 text-red-700
+                                {% elif category == 'warning' %} bg-yellow-100 border border-yellow-400 text-yellow-700
+                                {% else %} bg-blue-100 border border-blue-400 text-blue-700 
+                                {% endif %}" role="alert">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+ <section class="container mx-auto px-4 sm:px-10">
+ <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+ <div class="lg:col-span-2 flex flex-col gap-6 rounded-lg bg-white p-6 shadow-lg">
+ <img src="{{ url_for('static', filename='images/hero_placeholder_1.jpg') }}" alt="Bienvenido a Maria Elena Bienes Raíces" class="h-auto w-full rounded-md object-cover max-h-[500px]" />
+ <div class="flex flex-col gap-3">
+ <h2 class="text-3xl font-semibold text-gray-800">Bienvenido a Maria Elena Bienes Raíces</h2>
+ <p class="text-md text-gray-600 leading-relaxed">Su socio de confianza para encontrar la propiedad perfecta. Explore nuestras listas y descubra la casa de sus sueños o la inversión ideal. Ofrecemos una amplia gama de propiedades para satisfacer todas sus necesidades.</p>
+ <a href="{{ url_for('main.properties_list') }}" class="mt-2 inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-blue-600 px-5 py-3 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 w-full sm:w-auto"> Explorar Propiedades </a>
+ </div>
+ </div>
+ <div class="lg:col-span-1 flex flex-col gap-6 rounded-lg bg-white p-6 shadow-lg">
+ <h3 class="text-xl font-semibold text-gray-800">Contáctenos Rápidamente</h3>
+ <form action="{{ url_for('main.contact') }}" method="POST" class="flex flex-col gap-4">
+ <input type="text" name="name" placeholder="Nombre Completo" required class="rounded-md border border-solid border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" />
+ <input type="email" name="email" placeholder="Correo Electrónico" required class="rounded-md border border-solid border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" />
+ <textarea name="message" placeholder="Su Mensaje" rows="5" required class="rounded-md border border-solid border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors" spellcheck="false"></textarea>
+ <button type="submit" class="flex items-center justify-center gap-2 whitespace-nowrap rounded-md bg-green-500 px-5 py-3 text-sm font-medium text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors duration-150"> Enviar Mensaje </button>
+ </form>
+ </div>
+ </div>
+ </section>
+ <section class="container mx-auto px-4 sm:px-10 py-12 mt-10">
+ <h3 class="mb-8 text-2xl font-semibold text-center text-gray-800">Propiedades Destacadas</h3>
+ <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {% if featured_properties %}
+                        {% for property in featured_properties %}
+ <div class="flex flex-col rounded-lg bg-white p-5 shadow-lg hover:shadow-xl transition-shadow duration-150 ease-in-out overflow-hidden">
+                                {% set image_filenames = property.images.split(',') if property.images else [] %}
+                                {% set image_url = url_for('static', filename='images/placeholder_property_1.jpg') %}
+                                {% if image_filenames and image_filenames[0] %}
+                                    {% set image_url = url_for('static', filename='uploads/properties/' + image_filenames[0].strip()) %}
+                                {% endif %}
+ <img src="{{ image_url }}" alt="Imagen de {{ property.title }}" class="mb-4 h-52 w-full rounded-md object-cover transition-transform duration-300 group-hover:scale-105" />
+ <h4 class="mb-2 text-lg font-semibold text-gray-800 truncate" title="{{ property.title }}">{{ property.title }}</h4>
+ <p class="mb-2 text-xl font-bold text-blue-600">${{ "%.0f"|format(property.price) }}</p>
+ <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Tipo:</span> {{ property.property_type }}</p>
+ <p class="text-sm text-gray-600 mb-1"><span class="font-medium">Ubicación:</span> <span class="truncate" title="{{ property.address }}">{{ property.address.split(',')[0] if property.address else 'N/A' }}</span></p>
+ <p class="text-sm text-gray-600 mb-3">
+ <span class="font-medium">{{ property.bedrooms }}</span> Dorm., 
+ <span class="font-medium">{{ property.bathrooms }}</span> Baños, 
+ <span class="font-medium">{{ property.size_sqm }}</span> m²
+ </p>
+ <a href="{{ url_for('main.property_detail', property_id=property.id) }}" class="mt-auto w-full text-center whitespace-nowrap rounded-md bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150">
+ Ver Detalles
+ </a>
+ </div>
+                        {% endfor %}
+                    {% else %}
+ <p class="col-span-full text-center text-gray-500">No hay propiedades destacadas en este momento.</p>
+                    {% endif %}
+ </div>
+ </section>
+ </main> <footer class="bg-gray-800 text-gray-200 px-10 py-8 text-center"> <p class="text-sm">&copy; {{ JINJA_GLOBALS.current_year }} Maria Elena Bienes Raíces. Todos los derechos reservados.</p> <p class="text-xs mt-1">Diseñado con ❤️</p> </footer> </div> </div> </body> </html>
