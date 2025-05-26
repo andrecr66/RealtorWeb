@@ -1,4 +1,4 @@
-from app import db
+from app import db # This should get the 'db' instance defined in app/__init__.py
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
