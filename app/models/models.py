@@ -1,4 +1,4 @@
-from app import db # This should get the 'db' instance defined in app/__init__.py
+from app import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -33,28 +33,43 @@ class Agent(db.Model):
     def __repr__(self):
         return f'<Agent {self.name}>'
 
+from app import db
+from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
+# ... (AdminUser and Agent models remain the same) ...
+
 class Property(db.Model):
     __tablename__ = 'property'
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(150), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    price = db.Column(db.Numeric(10, 2), nullable=False)
-    property_type = db.Column(db.String(50), nullable=False)
+    description = db.Column(db.Text, nullable=False) # Keep this as main description
+    # description_short = db.Column(db.String(500), nullable=True) # Optional for cards
+    price = db.Column(db.Numeric(10, 2), nullable=False) # Keep this
+    # price_numeric = db.Column(db.Float, nullable=True, index=True) # Optional if price is always numeric
+    property_type = db.Column(db.String(50), nullable=False) # Keep Jules's name
     address = db.Column(db.String(255), nullable=False)
+    # city = db.Column(db.String(100), nullable=True) # Optional
+    # zip_code = db.Column(db.String(20), nullable=True) # Optional
     size_sqm = db.Column(db.Integer, nullable=True)
     bedrooms = db.Column(db.Integer, nullable=True)
-    bathrooms = db.Column(db.Integer, nullable=True)
-    features = db.Column(db.Text, nullable=True)
-    images = db.Column(db.Text, nullable=True) # JSON string array
-    status = db.Column(db.String(20), nullable=False, default='For Sale')
-    date_listed = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    bathrooms = db.Column(db.Integer, nullable=True) # Can be Float if you have half-baths
+    features = db.Column(db.Text, nullable=True) # Keep this
+    images = db.Column(db.Text, nullable=True) # Keep this for JSON string array
+    status = db.Column(db.String(20), nullable=False, default='For Sale', index=True) # Add index
+    date_listed = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, index=True) # Add index
     
+    is_featured = db.Column(db.Boolean, default=False, nullable=False, index=True) # <<< ADD THIS
+    # map_image_url = db.Column(db.String(255), nullable=True) # Optional
+
     agent_id = db.Column(db.Integer, db.ForeignKey('agent.id'), nullable=False)
     agent = db.relationship('Agent', backref=db.backref('properties', lazy=True))
 
     def __repr__(self):
         return f'<Property {self.title}>'
+
+# ... (Testimonial and ContactInquiry models remain the same) ...
 
 class Testimonial(db.Model):
     __tablename__ = 'testimonial'
